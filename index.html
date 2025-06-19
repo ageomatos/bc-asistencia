@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Asistencia V8 - Obligatorio y GitHub/Netlify</title>
+    <title>Registro de Asistencia V9 - Ajustado para iPhone 14</title>
     <style>
         /* Estilos generales para el cuerpo y el contenedor */
         body {
@@ -80,32 +80,38 @@
 
         /* Estilos de la tabla */
         table {
-            width: 100%;
+            width: 100%; /* Asegura que la tabla ocupe el ancho completo disponible */
             border-collapse: collapse;
             margin-top: 15px; /* Margen superior para separar la tabla del encabezado del grupo */
-            min-width: 550px; /* Mínimo ancho para la tabla en pantallas pequeñas */
+            /* min-width: 550px; <-- REMOVIDO o ajustado en media queries para ser responsivo */
             border: 1px solid #dddddd; /* Borde alrededor de toda la tabla */
             border-radius: 0; /* Sin bordes redondeados */
             overflow: hidden; /* Para que los bordes se apliquen correctamente a las celdas */
+            table-layout: fixed; /* Ayuda a que las columnas se distribuyan uniformemente */
         }
         th, td {
             border: 1px solid #dddddd; /* Bordes de las celdas */
-            padding: 8px 10px; /* Padding ajustado */
+            padding: 8px 5px; /* Padding reducido para columnas de radio */
             text-align: left;
             vertical-align: middle;
+            word-wrap: break-word; /* Permite que el texto se rompa en varias líneas si es muy largo */
+        }
+        th:first-child, td:first-child {
+            width: 50%; /* Dar más espacio a la columna de nombres */
+            padding-left: 10px; /* Un poco más de padding a la izquierda para los nombres */
+        }
+        th:not(:first-child), td:not(:first-child) {
+            width: 16.67%; /* Distribuir el 50% restante entre las 3 columnas (50/3 = ~16.67%) */
+            text-align: center; /* Centrar los radio buttons */
         }
         th {
             background-color: #f2f2f2; /* Fondo de encabezado de tabla más claro */
             color: #555;
             font-weight: bold;
         }
-        /* Estilo para las filas impares para una ligera alternancia si se desea */
-        /* tr:nth-child(even) {
-            background-color: #f9f9f9;
-        } */
 
         td input[type="radio"] {
-            margin-right: 5px; /* Espacio reducido */
+            margin: 0; /* Eliminar margen para centrar mejor */
             transform: scale(1.0); /* Tamaño normal */
             cursor: pointer;
             min-width: 20px; /* Asegura un tamaño mínimo del objetivo táctil para el radio button */
@@ -155,9 +161,20 @@
                 margin-top: 10px;
                 min-height: 36px; /* Tamaño ligeramente menor pero aún táctil */
             }
+            /* Ajustes para la tabla en pantallas de tabletas/móviles grandes */
+            table {
+                min-width: unset; /* Permite que la tabla se encoja sin límite */
+            }
             th, td {
-                padding: 6px 8px;
+                padding: 6px 4px; /* Reducir aún más el padding */
                 font-size: 0.85em;
+            }
+            th:first-child, td:first-child {
+                width: 45%; /* Ajustar ancho de nombres */
+                padding-left: 8px;
+            }
+            th:not(:first-child), td:not(:first-child) {
+                width: 18.33%; /* Ajustar el resto del ancho */
             }
             td input[type="radio"] {
                 min-width: 18px;
@@ -171,7 +188,7 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 480px) { /* Para pantallas de iPhone 14 y similares */
             h1 {
                 font-size: 1.2em;
                 padding: 8px 0;
@@ -183,7 +200,14 @@
             }
             th, td {
                 font-size: 0.75em;
-                padding: 4px 6px;
+                padding: 4px 3px; /* Mínimo padding para maximizar espacio */
+            }
+            th:first-child, td:first-child {
+                width: 40%; /* Reducir aún más el espacio para nombres */
+                padding-left: 6px;
+            }
+            th:not(:first-child), td:not(:first-child) {
+                width: 20%; /* El 60% restante se distribuye entre 3 columnas */
             }
             td input[type="radio"] {
                 min-width: 16px;
@@ -415,19 +439,13 @@
                     if (selectedOption) {
                         attendanceData[personName] = selectedOption.value;
                     } else {
-                        // Si una persona no tiene ninguna opción seleccionada, la validación fallará.
-                        // El atributo 'required' del HTML ya maneja esto a nivel de navegador,
-                        // pero esta lógica adicional serviría para validación personalizada si se necesitara.
                         allRequiredSelected = false;
-                        // Opcional: Podrías añadir un mensaje de error visual aquí para el usuario.
                     }
                 }
 
                 if (!allRequiredSelected) {
-                    // Esto no debería ejecutarse si el atributo 'required' está funcionando correctamente,
-                    // ya que el navegador detendría el envío del formulario antes.
-                    console.error('Por favor, selecciona una opción para todas las personas.');
-                    // alert('Por favor, selecciona una opción para todas las personas.');
+                    // El navegador ya manejará la validación 'required', pero este mensaje es una capa extra.
+                    alert('Por favor, selecciona una opción para todas las personas antes de registrar la asistencia.');
                     return; // Detiene la función si no todo lo requerido está seleccionado
                 }
 
