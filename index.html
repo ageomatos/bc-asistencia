@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia V8 - Obligatorio y GitHub/Netlify</title>
+    <style>
+        /* Estilos generales para el cuerpo y el contenedor */
+        body {
+            font-family: Arial, sans-serif; /* Fuente genérica para emular el estilo de la imagen */
+            margin: 0;
+            padding: 10px; /* Menos padding en los bordes */
+            background-color: #f0f0f0; /* Fondo gris muy claro, casi blanco */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 0; /* Sin bordes redondeados */
+            box-shadow: none; /* Sin sombras */
+            max-width: 900px;
+            width: 100%;
+            margin: 10px 0; /* Margen vertical simple */
+            overflow: hidden;
+            border: 1px solid #ccc; /* Borde simple alrededor del contenedor */
+        }
+        h1 {
+            background-color: #4f81bd; /* Azul oscuro similar al encabezado de la imagen */
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 12px 0; /* Padding reducido */
+            font-size: 1.6em; /* Tamaño de fuente ajustado */
+            border-radius: 0; /* Sin bordes redondeados */
+            box-shadow: none; /* Sin sombras */
+        }
+
+        /* Estilos para los encabezados de grupo */
+        .group-header {
+            background-color: #e6f0fa; /* Azul muy claro, casi blanco */
+            color: #333;
+            padding: 10px 15px; /* Padding ajustado */
+            margin-top: 15px; /* Margen para separar grupos */
+            border-radius: 0; /* Sin bordes redondeados */
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1em; /* Tamaño de fuente ajustado */
+            transition: none; /* Sin transiciones */
+            border: 1px solid #ccc; /* Borde simple */
+            border-left: none; /* Sin borde izquierdo */
+            border-right: none; /* Sin borde derecho */
+            min-height: 40px; /* Tamaño mínimo para un mejor toque */
+        }
+        .group-header:hover {
+            background-color: #dbeaf5; /* Ligeramente más oscuro al pasar el ratón */
+        }
+        .group-header span:last-child {
+            transition: none; /* Sin transiciones */
+        }
+        .group-header.expanded span:last-child {
+            transform: rotate(180deg);
+        }
+
+        /* Estilos para el contenido de grupo (la tabla) */
+        .group-content {
+            display: none; /* Oculto por defecto */
+            padding: 0 15px 15px 15px; /* Padding ajustado para la tabla */
+            border: 1px solid #ccc; /* Borde simple */
+            border-top: none; /* Sin borde superior (ya lo tiene el header) */
+            border-radius: 0; /* Sin bordes redondeados */
+            background-color: #ffffff;
+            overflow-x: auto; /* Permite desplazamiento horizontal si la tabla es demasiado ancha */
+        }
+
+        /* Estilos de la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px; /* Margen superior para separar la tabla del encabezado del grupo */
+            min-width: 550px; /* Mínimo ancho para la tabla en pantallas pequeñas */
+            border: 1px solid #dddddd; /* Borde alrededor de toda la tabla */
+            border-radius: 0; /* Sin bordes redondeados */
+            overflow: hidden; /* Para que los bordes se apliquen correctamente a las celdas */
+        }
+        th, td {
+            border: 1px solid #dddddd; /* Bordes de las celdas */
+            padding: 8px 10px; /* Padding ajustado */
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f2f2f2; /* Fondo de encabezado de tabla más claro */
+            color: #555;
+            font-weight: bold;
+        }
+        /* Estilo para las filas impares para una ligera alternancia si se desea */
+        /* tr:nth-child(even) {
+            background-color: #f9f9f9;
+        } */
+
+        td input[type="radio"] {
+            margin-right: 5px; /* Espacio reducido */
+            transform: scale(1.0); /* Tamaño normal */
+            cursor: pointer;
+            min-width: 20px; /* Asegura un tamaño mínimo del objetivo táctil para el radio button */
+            min-height: 20px;
+        }
+
+        /* Estilos para el botón de enviar */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px; /* Padding reducido */
+            margin: 20px auto; /* Centrado y con margen */
+            background-color: #4CAF50; /* Verde más estándar */
+            color: white;
+            border: 1px solid #3e8e41; /* Borde simple */
+            border-radius: 3px; /* Ligeros bordes redondeados, como los botones de la imagen */
+            font-size: 1em;
+            cursor: pointer;
+            transition: none; /* Sin transiciones */
+            box-shadow: none; /* Sin sombras */
+            font-weight: bold;
+            min-height: 40px; /* Asegura un tamaño mínimo para un mejor toque */
+        }
+        .submit-btn:hover {
+            background-color: #45a049; /* Verde ligeramente más oscuro al pasar el ratón */
+        }
+        .submit-btn:active {
+            transform: none; /* Sin efectos de transformación */
+            box-shadow: none;
+        }
+
+        /* Responsive design para pantallas pequeñas */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px; /* Menos padding en los bordes del cuerpo */
+            }
+            .container {
+                margin: 5px 0; /* Margen ajustado */
+            }
+            h1 {
+                font-size: 1.4em;
+                padding: 10px 0;
+            }
+            .group-header {
+                font-size: 0.9em;
+                padding: 8px 10px; /* Padding ajustado */
+                margin-top: 10px;
+                min-height: 36px; /* Tamaño ligeramente menor pero aún táctil */
+            }
+            th, td {
+                padding: 6px 8px;
+                font-size: 0.85em;
+            }
+            td input[type="radio"] {
+                min-width: 18px;
+                min-height: 18px;
+            }
+            .submit-btn {
+                font-size: 0.9em;
+                padding: 8px;
+                margin: 15px auto;
+                min-height: 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2em;
+                padding: 8px 0;
+            }
+            .group-header {
+                font-size: 0.85em;
+                padding: 6px 8px;
+                min-height: 32px;
+            }
+            th, td {
+                font-size: 0.75em;
+                padding: 4px 6px;
+            }
+            td input[type="radio"] {
+                min-width: 16px;
+                min-height: 16px;
+            }
+            .submit-btn {
+                font-size: 0.8em;
+                padding: 6px;
+                min-height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Asistencia</h1>
+
+        <form id="attendanceForm">
+            <!-- Grupo 1 -->
+            <div class="group">
+                <div class="group-header" data-target="group1Content">
+                    <span>Grupo 1 (Ageo Matos)</span>
+                    <span>&#9660;</span> <!-- Flecha hacia abajo -->
+                </div>
+                <div id="group1Content" class="group-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Presencial</th>
+                                <th>Zoom</th>
+                                <th>Ausente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Alcántara, Nelly</td><td><input type="radio" name="alcantaraNelly" value="presencial" required></td><td><input type="radio" name="alcantaraNelly" value="zoom"></td><td><input type="radio" name="alcantaraNelly" value="ausente"></td></tr>
+                            <tr><td>Binett, Ronny G.</td><td><input type="radio" name="binettRonnyG" value="presencial" required></td><td><input type="radio" name="binettRonnyG" value="zoom"></td><td><input type="radio" name="binettRonnyG" value="ausente"></td></tr>
+                            <tr><td>Breeding, Damarys</td><td><input type="radio" name="breedingDamarys" value="presencial" required></td><td><input type="radio" name="breedingDamarys" value="zoom"></td><td><input type="radio" name="breedingDamarys" value="ausente"></td></tr>
+                            <tr><td>Breeding, David</td><td><input type="radio" name="breedingDavid" value="presencial" required></td><td><input type="radio" name="breedingDavid" value="zoom"></td><td><input type="radio" name="breedingDavid" value="ausente"></td></tr>
+                            <tr><td>Cruzado, Francia</td><td><input type="radio" name="cruzadoFrancia" value="presencial" required></td><td><input type="radio" name="cruzadoFrancia" value="zoom"></td><td><input type="radio" name="cruzadoFrancia" value="ausente"></td></tr>
+                            <tr><td>Fenelón, Laura</td><td><input type="radio" name="fenelonLaura" value="presencial" required></td><td><input type="radio" name="fenelonLaura" value="zoom"></td><td><input type="radio" name="fenelonLaura" value="ausente"></td></tr>
+                            <tr><td>Frederick, Linda</td><td><input type="radio" name="frederickLinda" value="presencial" required></td><td><input type="radio" name="frederickLinda" value="zoom"></td><td><input type="radio" name="frederickLinda" value="ausente"></td></tr>
+                            <tr><td>Frederick, Pierre</td><td><input type="radio" name="frederickPierre" value="presencial" required></td><td><input type="radio" name="frederickPierre" value="zoom"></td><td><input type="radio" name="frederickPierre" value="ausente"></td></tr>
+                            <tr><td>Heredia, Kensli</td><td><input type="radio" name="herediaKensli" value="presencial" required></td><td><input type="radio" name="herediaKensli" value="zoom"></td><td><input type="radio" name="herediaKensli" value="ausente"></td></tr>
+                            <tr><td>Heredia, María</td><td><input type="radio" name="herediaMaria" value="presencial" required></td><td><input type="radio" name="herediaMaria" value="zoom"></td><td><input type="radio" name="herediaMaria" value="ausente"></td></tr>
+                            <tr><td>Hernández, María</td><td><input type="radio" name="hernandezMaria" value="presencial" required></td><td><input type="radio" name="hernandezMaria" value="zoom"></td><td><input type="radio" name="hernandezMaria" value="ausente"></td></tr>
+                            <tr><td>Jean Paul, Flor</td><td><input type="radio" name="jeanPaulFlor" value="presencial" required></td><td><input type="radio" name="jeanPaulFlor" value="zoom"></td><td><input type="radio" name="jeanPaulFlor" value="ausente"></td></tr>
+                            <tr><td>Matos, Ageo</td><td><input type="radio" name="matosAgeo" value="presencial" required></td><td><input type="radio" name="matosAgeo" value="zoom"></td><td><input type="radio" name="matosAgeo" value="ausente"></td></tr>
+                            <tr><td>Matos, Brittany</td><td><input type="radio" name="matosBrittany" value="presencial" required></td><td><input type="radio" name="matosBrittany" value="zoom"></td><td><input type="radio" name="matosBrittany" value="ausente"></td></tr>
+                            <tr><td>Ortiz, Violeta</td><td><input type="radio" name="ortizVioleta" value="presencial" required></td><td><input type="radio" name="ortizVioleta" value="zoom"></td><td><input type="radio" name="ortizVioleta" value="ausente"></td></tr>
+                            <tr><td>Peña, Ruth</td><td><input type="radio" name="penaRuth" value="presencial" required></td><td><input type="radio" name="penaRuth" value="zoom"></td><td><input type="radio" name="penaRuth" value="ausente"></td></tr>
+                            <tr><td>Peña, Yovanna</td><td><input type="radio" name="penaYovanna" value="presencial" required></td><td><input type="radio" name="penaYovanna" value="zoom"></td><td><input type="radio" name="penaYovanna" value="ausente"></td></tr>
+                            <tr><td>Perdomo, Rafaela</td><td><input type="radio" name="perdomoRafaela" value="presencial" required></td><td><input type="radio" name="perdomoRafaela" value="zoom"></td><td><input type="radio" name="perdomoRafaela" value="ausente"></td></tr>
+                            <tr><td>Rivera, Fidelina</td><td><input type="radio" name="riveraFidelina" value="presencial" required></td><td><input type="radio" name="riveraFidelina" value="zoom"></td><td><input type="radio" name="riveraFidelina" value="ausente"></td></tr>
+                            <tr><td>Rosario, Ángel</td><td><input type="radio" name="rosarioAngel" value="presencial" required></td><td><input type="radio" name="rosarioAngel" value="zoom"></td><td><input type="radio" name="rosarioAngel" value="ausente"></td></tr>
+                            <tr><td>Sainvail, Eli</td><td><input type="radio" name="sainvailEli" value="presencial" required></td><td><input type="radio" name="sainvailEli" value="zoom"></td><td><input type="radio" name="sainvailEli" value="ausente"></td></tr>
+                            <tr><td>Sainvil, Isabelle</td><td><input type="radio" name="sainvilIsabelle" value="presencial" required></td><td><input type="radio" name="sainvilIsabelle" value="zoom"></td><td><input type="radio" name="sainvilIsabelle" value="ausente"></td></tr>
+                            <tr><td>Santos, Esmeralda</td><td><input type="radio" name="santosEsmeralda" value="presencial" required></td><td><input type="radio" name="santosEsmeralda" value="zoom"></td><td><input type="radio" name="santosEsmeralda" value="ausente"></td></tr>
+                            <tr><td>Santos, Jeyson</td><td><input type="radio" name="santosJeyson" value="presencial" required></td><td><input type="radio" name="santosJeyson" value="zoom"></td><td><input type="radio" name="santosJeyson" value="ausente"></td></tr>
+                            <tr><td>Victorino, Romelia</td><td><input type="radio" name="victorinoRomelia" value="presencial" required></td><td><input type="radio" name="victorinoRomelia" value="zoom"></td><td><input type="radio" name="victorinoRomelia" value="ausente"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grupo 2 -->
+            <div class="group">
+                <div class="group-header" data-target="group2Content">
+                    <span>Grupo 2 (Jonathan Pio)</span>
+                    <span>&#9660;</span> <!-- Flecha hacia abajo -->
+                </div>
+                <div id="group2Content" class="group-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Presencial</th>
+                                <th>Zoom</th>
+                                <th>Ausente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Acosta, Dianelly</td><td><input type="radio" name="acostaDianelly" value="presencial" required></td><td><input type="radio" name="acostaDianelly" value="zoom"></td><td><input type="radio" name="acostaDianelly" value="ausente"></td></tr>
+                            <tr><td>Alexis, María</td><td><input type="radio" name="alexisMaria" value="presencial" required></td><td><input type="radio" name="alexisMaria" value="zoom"></td><td><input type="radio" name="alexisMaria" value="ausente"></td></tr>
+                            <tr><td>Brito, Lorenza</td><td><input type="radio" name="britoLorenza" value="presencial" required></td><td><input type="radio" name="britoLorenza" value="zoom"></td><td><input type="radio" name="britoLorenza" value="ausente"></td></tr>
+                            <tr><td>Brito, Santiago</td><td><input type="radio" name="britoSantiago" value="presencial" required></td><td><input type="radio" name="britoSantiago" value="zoom"></td><td><input type="radio" name="britoSantiago" value="ausente"></td></tr>
+                            <tr><td>Calderón, Pedro</td><td><input type="radio" name="calderonPedro" value="presencial" required></td><td><input type="radio" name="calderonPedro" value="zoom"></td><td><input type="radio" name="calderonPedro" value="ausente"></td></tr>
+                            <tr><td>Calderón, Yida</td><td><input type="radio" name="calderonYida" value="presencial" required></td><td><input type="radio" name="calderonYida" value="zoom"></td><td><input type="radio" name="calderonYida" value="ausente"></td></tr>
+                            <tr><td>Castillo, Kimberley</td><td><input type="radio" name="castilloKimberley" value="presencial" required></td><td><input type="radio" name="castilloKimberley" value="zoom"></td><td><input type="radio" name="castilloKimberley" value="ausente"></td></tr>
+                            <tr><td>Claudio, Juan</td><td><input type="radio" name="claudioJuan" value="presencial" required></td><td><input type="radio" name="claudioJuan" value="zoom"></td><td><input type="radio" name="claudioJuan" value="ausente"></td></tr>
+                            <tr><td>Fañas, Rosa</td><td><input type="radio" name="fanasRosa" value="presencial" required></td><td><input type="radio" name="fanasRosa" value="zoom"></td><td><input type="radio" name="fanasRosa" value="ausente"></td></tr>
+                            <tr><td>Fañas, William</td><td><input type="radio" name="fanasWilliam" value="presencial" required></td><td><input type="radio" name="fanasWilliam" value="zoom"></td><td><input type="radio" name="fanasWilliam" value="ausente"></td></tr>
+                            <tr><td>Guerrero, Wendy</td><td><input type="radio" name="guerreroWendy" value="presencial" required></td><td><input type="radio" name="guerreroWendy" value="zoom"></td><td><input type="radio" name="guerreroWendy" value="ausente"></td></tr>
+                            <tr><td>Ignacio, Lilian</td><td><input type="radio" name="ignacioLilian" value="presencial" required></td><td><input type="radio" name="ignacioLilian" value="zoom"></td><td><input type="radio" name="ignacioLilian" value="ausente"></td></tr>
+                            <tr><td>López, Dulce</td><td><input type="radio" name="lopezDulce" value="presencial" required></td><td><input type="radio" name="lopezDulce" value="zoom"></td><td><input type="radio" name="lopezDulce" value="ausente"></td></tr>
+                            <tr><td>López, Loida</td><td><input type="radio" name="lopezLoida" value="presencial" required></td><td><input type="radio" name="lopezLoida" value="zoom"></td><td><input type="radio" name="lopezLoida" value="ausente"></td></tr>
+                            <tr><td>Morillo, Miguelina</td><td><input type="radio" name="morilloMiguelina" value="presencial" required></td><td><input type="radio" name="morilloMiguelina" value="zoom"></td><td><input type="radio" name="morilloMiguelina" value="ausente"></td></tr>
+                            <tr><td>Mosquea, Altagracia</td><td><input type="radio" name="mosqueaAltagracia" value="presencial" required></td><td><input type="radio" name="mosqueaAltagracia" value="zoom"></td><td><input type="radio" name="mosqueaAltagracia" value="ausente"></td></tr>
+                            <tr><td>Pio, Jonathan</td><td><input type="radio" name="pioJonathan" value="presencial" required></td><td><input type="radio" name="pioJonathan" value="zoom"></td><td><input type="radio" name="pioJonathan" value="ausente"></td></tr>
+                            <tr><td>Pio, Rubén</td><td><input type="radio" name="pioRuben" value="presencial" required></td><td><input type="radio" name="pioRuben" value="zoom"></td><td><input type="radio" name="pioRuben" value="ausente"></td></tr>
+                            <tr><td>Pio, Ruth</td><td><input type="radio" name="pioRuth" value="presencial" required></td><td><input type="radio" name="pioRuth" value="zoom"></td><td><input type="radio" name="pioRuth" value="ausente"></td></tr>
+                            <tr><td>Pio, Thanel</td><td><input type="radio" name="pioThanel" value="presencial" required></td><td><input type="radio" name="pioThanel" value="zoom"></td><td><input type="radio" name="pioThanel" value="ausente"></td></tr>
+                            <tr><td>Reyes, Astri</td><td><input type="radio" name="reyesAstri" value="presencial" required></td><td><input type="radio" name="reyesAstri" value="zoom"></td><td><input type="radio" name="reyesAstri" value="ausente"></td></tr>
+                            <tr><td>Reyes, Kaitly</td><td><input type="radio" name="reyesKaitly" value="presencial" required></td><td><input type="radio" name="reyesKaitly" value="zoom"></td><td><input type="radio" name="reyesKaitly" value="ausente"></td></tr>
+                            <tr><td>Reyes, Keissy</td><td><input type="radio" name="reyesKeissy" value="presencial" required></td><td><input type="radio" name="reyesKeissy" value="zoom"></td><td><input type="radio" name="reyesKeissy" value="ausente"></td></tr>
+                            <tr><td>Segura, Egla</td><td><input type="radio" name="seguraEgla" value="presencial" required></td><td><input type="radio" name="seguraEgla" value="zoom"></td><td><input type="radio" name="seguraEgla" value="ausente"></td></tr>
+                            <tr><td>Segura, Sara</td><td><input type="radio" name="seguraSara" value="presencial" required></td><td><input type="radio" name="seguraSara" value="zoom"></td><td><input type="radio" name="seguraSara" value="ausente"></td></tr>
+                            <tr><td>Segura, Tito</td><td><input type="radio" name="seguraTito" value="presencial" required></td><td><input type="radio" name="seguraTito" value="zoom"></td><td><input type="radio" name="seguraTito" value="ausente"></td></tr>
+                            <tr><td>Tamárez, Carmen</td><td><input type="radio" name="tamarezCarmen" value="presencial" required></td><td><input type="radio" name="tamarezCarmen" value="zoom"></td><td><input type="radio" name="tamarezCarmen" value="ausente"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grupo 3 -->
+            <div class="group">
+                <div class="group-header" data-target="group3Content">
+                    <span>Grupo 3 (Andrés Ramírez)</span>
+                    <span>&#9660;</span> <!-- Flecha hacia abajo -->
+                </div>
+                <div id="group3Content" class="group-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Presencial</th>
+                                <th>Zoom</th>
+                                <th>Ausente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Abreu, Lourdes</td><td><input type="radio" name="abreuLourdes" value="presencial" required></td><td><input type="radio" name="abreuLourdes" value="zoom"></td><td><input type="radio" name="abreuLourdes" value="ausente"></td></tr>
+                            <tr><td>Abreu, Roberto</td><td><input type="radio" name="abreuRoberto" value="presencial" required></td><td><input type="radio" name="abreuRoberto" value="zoom"></td><td><input type="radio" name="abreuRoberto" value="ausente"></td></tr>
+                            <tr><td>Aquino, Bienvenido</td><td><input type="radio" name="aquinoBienvenido" value="presencial" required></td><td><input type="radio" name="aquinoBienvenido" value="zoom"></td><td><input type="radio" name="aquinoBienvenido" value="ausente"></td></tr>
+                            <tr><td>Aquino, Misael</td><td><input type="radio" name="aquinoMisael" value="presencial" required></td><td><input type="radio" name="aquinoMisael" value="zoom"></td><td><input type="radio" name="aquinoMisael" value="ausente"></td></tr>
+                            <tr><td>Aquino, Oneida</td><td><input type="radio" name="aquinoOneida" value="presencial" required></td><td><input type="radio" name="aquinoOneida" value="zoom"></td><td><input type="radio" name="aquinoOneida" value="ausente"></td></tr>
+                            <tr><td>Arciniega, Leonicia</td><td><input type="radio" name="arciniegaLeonicia" value="presencial" required></td><td><input type="radio" name="arciniegaLeonicia" value="zoom"></td><td><input type="radio" name="arciniegaLeonicia" value="ausente"></td></tr>
+                            <tr><td>De Jesús, Ysis</td><td><input type="radio" name="deJesusYsis" value="presencial" required></td><td><input type="radio" name="deJesusYsis" value="zoom"></td><td><input type="radio" name="deJesusYsis" value="ausente"></td></tr>
+                            <tr><td>Dévora, Gloria</td><td><input type="radio" name="devoraGloria" value="presencial" required></td><td><input type="radio" name="devoraGloria" value="zoom"></td><td><input type="radio" name="devoraGloria" value="ausente"></td></tr>
+                            <tr><td>Dévora, Milagros</td><td><input type="radio" name="devoraMilagros" value="presencial" required></td><td><input type="radio" name="devoraMilagros" value="zoom"></td><td><input type="radio" name="devoraMilagros" value="ausente"></td></tr>
+                            <tr><td>Espinosa, Maira</td><td><input type="radio" name="espinosaMaira" value="presencial" required></td><td><input type="radio" name="espinosaMaira" value="zoom"></td><td><input type="radio" name="espinosaMaira" value="ausente"></td></tr>
+                            <tr><td>Espinosa, Rosaury</td><td><input type="radio" name="espinosaRosaury" value="presencial" required></td><td><input type="radio" name="espinosaRosaury" value="zoom"></td><td><input type="radio" name="espinosaRosaury" value="ausente"></td></tr>
+                            <tr><td>Frías, Oniel</td><td><input type="radio" name="friasOniel" value="presencial" required></td><td><input type="radio" name="friasOniel" value="zoom"></td><td><input type="radio" name="friasOniel" value="ausente"></td></tr>
+                            <tr><td>Marte, Eleudy</td><td><input type="radio" name="marteEleudy" value="presencial" required></td><td><input type="radio" name="marteEleudy" value="zoom"></td><td><input type="radio" name="marteEleudy" value="ausente"></td></tr>
+                            <tr><td>Mena, Yamily</td><td><input type="radio" name="menaYamily" value="presencial" required></td><td><input type="radio" name="menaYamily" value="zoom"></td><td><input type="radio" name="menaYamily" value="ausente"></td></tr>
+                            <tr><td>Mendoza, Yudelka</td><td><input type="radio" name="mendozaYudelka" value="presencial" required></td><td><input type="radio" name="mendozaYudelka" value="zoom"></td><td><input type="radio" name="mendozaYudelka" value="ausente"></td></tr>
+                            <tr><td>Pío, Marciano</td><td><input type="radio" name="pioMarciano" value="presencial" required></td><td><input type="radio" name="pioMarciano" value="zoom"></td><td><input type="radio" name="pioMarciano" value="ausente"></td></tr>
+                            <tr><td>Pío, Sabrina</td><td><input type="radio" name="pioSabrina" value="presencial" required></td><td><input type="radio" name="pioSabrina" value="zoom"></td><td><input type="radio" name="pioSabrina" value="ausente"></td></tr>
+                            <tr><td>Ramírez, Andrés</td><td><input type="radio" name="ramirezAndres" value="presencial" required></td><td><input type="radio" name="ramirezAndres" value="zoom"></td><td><input type="radio" name="ramirezAndres" value="ausente"></td></tr>
+                            <tr><td>Ramírez, Margarita</td><td><input type="radio" name="ramirezMargarita" value="presencial" required></td><td><input type="radio" name="ramirezMargarita" value="zoom"></td><td><input type="radio" name="ramirezMargarita" value="ausente"></td></tr>
+                            <tr><td>Reyes, Melina</td><td><input type="radio" name="reyesMelina" value="presencial" required></td><td><input type="radio" name="reyesMelina" value="zoom"></td><td><input type="radio" name="reyesMelina" value="ausente"></td></tr>
+                            <tr><td>Reyes, Zoila</td><td><input type="radio" name="reyesZoila" value="presencial" required></td><td><input type="radio" name="reyesZoila" value="zoom"></td><td><input type="radio" name="reyesZoila" value="ausente"></td></tr>
+                            <tr><td>Rodríguez, Paul</td><td><input type="radio" name="rodriguezPaul" value="presencial" required></td><td><input type="radio" name="rodriguezPaul" value="zoom"></td><td><input type="radio" name="rodriguezPaul" value="ausente"></td></tr>
+                            <tr><td>Rodríguez, Ruth</td><td><input type="radio" name="rodriguezRuth" value="presencial" required></td><td><input type="radio" name="rodriguezRuth" value="zoom"></td><td><input type="radio" name="rodriguezRuth" value="ausente"></td></tr>
+                            <tr><td>Rosario, Jesús</td><td><input type="radio" name="rosarioJesus" value="presencial" required></td><td><input type="radio" name="rosarioJesus" value="zoom"></td><td><input type="radio" name="rosarioJesus" value="ausente"></td></tr>
+                            <tr><td>Ureña, Reina</td><td><input type="radio" name="urenaReina" value="presencial" required></td><td><input type="radio" name="urenaReina" value="zoom"></td><td><input type="radio" name="urenaReina" value="ausente"></td></tr>
+                            <tr><td>Valdez, Oneida</td><td><input type="radio" name="valdezOneida" value="presencial" required></td><td><input type="radio" name="valdezOneida" value="zoom"></td><td><input type="radio" name="valdezOneida" value="ausente"></td></tr>
+                            <tr><td>Vásquez, Geonelis</td><td><input type="radio" name="vasquezGeonelis" value="presencial" required></td><td><input type="radio" name="vasquezGeonelis" value="zoom"></td><td><input type="radio" name="vasquezGeonelis" value="ausente"></td></tr>
+                            <tr><td>Velásquez, Milagros</td><td><input type="radio" name="velasquezMilagros" value="presencial" required></td><td><input type="radio" name="velasquezMilagros" value="zoom"></td><td><input type="radio" name="velasquezMilagros" value="ausente"></td></tr>
+                            <tr><td>Zorrilla, Ramona</td><td><input type="radio" name="zorrillaRamona" value="presencial" required></td><td><input type="radio" name="zorrillaRamona" value="zoom"></td><td><input type="radio" name="zorrillaRamona" value="ausente"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Registrar Asistencia</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona todos los encabezados de grupo
+            const groupHeaders = document.querySelectorAll('.group-header');
+
+            // Itera sobre cada encabezado de grupo para añadir el evento de clic
+            groupHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    // Obtiene el ID del contenido objetivo desde el atributo data-target
+                    const targetId = this.dataset.target;
+                    // Selecciona el elemento de contenido correspondiente
+                    const content = document.getElementById(targetId);
+                    // Selecciona la flecha dentro del encabezado
+                    const arrow = this.querySelector('span:last-child');
+
+                    // Alterna la visibilidad del contenido
+                    if (content.style.display === 'block') {
+                        content.style.display = 'none';
+                        arrow.innerHTML = '&#9660;'; // Flecha hacia abajo cuando está colapsado
+                        this.classList.remove('expanded'); // Elimina la clase 'expanded'
+                    } else {
+                        // Cierra otros grupos abiertos antes de abrir este
+                        document.querySelectorAll('.group-content').forEach(otherContent => {
+                            if (otherContent.id !== targetId && otherContent.style.display === 'block') {
+                                otherContent.style.display = 'none';
+                                const otherHeader = otherContent.previousElementSibling;
+                                otherHeader.querySelector('span:last-child').innerHTML = '&#9660;';
+                                otherHeader.classList.remove('expanded');
+                            }
+                        });
+
+                        content.style.display = 'block';
+                        arrow.innerHTML = '&#9650;'; // Flecha hacia arriba cuando está expandido
+                        this.classList.add('expanded'); // Añade la clase 'expanded'
+                    }
+                });
+            });
+
+            // Manejar el envío del formulario
+            const attendanceForm = document.getElementById('attendanceForm');
+
+            attendanceForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Previene el envío por defecto del formulario (y la recarga de la página)
+
+                const attendanceData = {}; // Objeto para almacenar los datos de asistencia
+
+                // Obtener todos los grupos de radio buttons (por nombre)
+                const radioGroups = {};
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    if (!radioGroups[radio.name]) {
+                        radioGroups[radio.name] = [];
+                    }
+                    radioGroups[radio.name].push(radio);
+                });
+
+                let allRequiredSelected = true;
+
+                for (const personName in radioGroups) {
+                    const selectedOption = document.querySelector(`input[name="${personName}"]:checked`);
+                    if (selectedOption) {
+                        attendanceData[personName] = selectedOption.value;
+                    } else {
+                        // Si una persona no tiene ninguna opción seleccionada, la validación fallará.
+                        // El atributo 'required' del HTML ya maneja esto a nivel de navegador,
+                        // pero esta lógica adicional serviría para validación personalizada si se necesitara.
+                        allRequiredSelected = false;
+                        // Opcional: Podrías añadir un mensaje de error visual aquí para el usuario.
+                    }
+                }
+
+                if (!allRequiredSelected) {
+                    // Esto no debería ejecutarse si el atributo 'required' está funcionando correctamente,
+                    // ya que el navegador detendría el envío del formulario antes.
+                    console.error('Por favor, selecciona una opción para todas las personas.');
+                    // alert('Por favor, selecciona una opción para todas las personas.');
+                    return; // Detiene la función si no todo lo requerido está seleccionado
+                }
+
+
+                console.log('Datos de Asistencia Recolectados:', attendanceData);
+
+                // Sección para enviar los datos a un backend (requiere implementación)
+                // Es importante entender que la base de datos y el envío de correos
+                // no pueden manejarse directamente desde el código HTML/JS/CSS del frontend
+                // por razones de seguridad y funcionalidad. Necesitas un servicio de backend.
+
+                /*
+                // Ejemplo conceptual de cómo enviarías datos a un backend:
+                fetch('/api/guardar-asistencia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(attendanceData),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP! Estado: ${response.status}`);
+                    }
+                    return response.json(); // O response.text() si el backend no devuelve JSON
+                })
+                .then(data => {
+                    console.log('Respuesta del servidor:', data);
+                    alert('Asistencia registrada con éxito! Los resultados se enviarán por correo.');
+                    // Opcional: Reiniciar el formulario o mostrar un mensaje de éxito
+                    attendanceForm.reset(); // Para limpiar el formulario después del envío
+                })
+                .catch((error) => {
+                    console.error('Error al registrar la asistencia:', error);
+                    alert('Hubo un error al registrar la asistencia. Por favor, inténtalo de nuevo.');
+                });
+                */
+
+                // Para esta demostración sin un backend, mostramos una alerta simple
+                alert('Asistencia registrada. Consulta la consola del navegador (F12) para ver los datos.\n\nNOTA: Para guardar los datos en una base de datos y enviar correos, necesitarías configurar un servicio de backend.');
+            });
+        });
+    </script>
+</body>
+</html>
