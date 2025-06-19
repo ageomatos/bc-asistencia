@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Asistencia V9 - Ajustado para iPhone 14</title>
+    <title>Registro de Asistencia V11 - Ausentes por Grupo</title>
     <style>
         /* Estilos generales para el cuerpo y el contenedor */
         body {
@@ -83,7 +83,6 @@
             width: 100%; /* Asegura que la tabla ocupe el ancho completo disponible */
             border-collapse: collapse;
             margin-top: 15px; /* Margen superior para separar la tabla del encabezado del grupo */
-            /* min-width: 550px; <-- REMOVIDO o ajustado en media queries para ser responsivo */
             border: 1px solid #dddddd; /* Borde alrededor de toda la tabla */
             border-radius: 0; /* Sin bordes redondeados */
             overflow: hidden; /* Para que los bordes se apliquen correctamente a las celdas */
@@ -96,10 +95,24 @@
             vertical-align: middle;
             word-wrap: break-word; /* Permite que el texto se rompa en varias líneas si es muy largo */
         }
+
+        /* Estilos para la primera columna fija */
         th:first-child, td:first-child {
             width: 50%; /* Dar más espacio a la columna de nombres */
             padding-left: 10px; /* Un poco más de padding a la izquierda para los nombres */
+            position: sticky; /* Hace que la columna sea pegajosa al desplazar */
+            left: 0; /* Fija la columna a la izquierda */
+            background-color: inherit; /* Hereda el color de fondo de la fila para las celdas de datos */
+            z-index: 2; /* Asegura que la columna fija esté por encima de las otras al desplazar */
+            box-shadow: 2px 0 3px rgba(0,0,0,0.1); /* Sombra sutil para la columna fija */
         }
+
+        /* Color de fondo específico para el encabezado de la primera columna fija */
+        th:first-child {
+            background-color: #f2f2f2; /* Fondo del encabezado de la primera columna */
+            z-index: 3; /* Mayor z-index para el encabezado fijo */
+        }
+
         th:not(:first-child), td:not(:first-child) {
             width: 16.67%; /* Distribuir el 50% restante entre las 3 columnas (50/3 = ~16.67%) */
             text-align: center; /* Centrar los radio buttons */
@@ -109,6 +122,22 @@
             color: #555;
             font-weight: bold;
         }
+
+        /* Color de relleno para líneas alternas */
+        tbody tr:nth-child(odd) {
+            background-color: #ffffff; /* Blanco para filas impares */
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Gris muy claro para filas pares */
+        }
+        /* Ajustar el fondo de la celda sticky para filas alternas */
+        tbody tr:nth-child(even) td:first-child {
+            background-color: #f9f9f9;
+        }
+        tbody tr:nth-child(odd) td:first-child {
+            background-color: #ffffff;
+        }
+
 
         td input[type="radio"] {
             margin: 0; /* Eliminar margen para centrar mejor */
@@ -379,26 +408,72 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Selecciona todos los encabezados de grupo
+            // Define la estructura de los grupos y sus miembros para facilitar la extracción de ausentes por grupo
+            const groupsData = {
+                "Grupo 1 (Ageo Matos)": [
+                    "Alcántara, Nelly", "Binett, Ronny G.", "Breeding, Damarys", "Breeding, David",
+                    "Cruzado, Francia", "Fenelón, Laura", "Frederick, Linda", "Frederick, Pierre",
+                    "Heredia, Kensli", "Heredia, María", "Hernández, María", "Jean Paul, Flor",
+                    "Matos, Ageo", "Matos, Brittany", "Ortiz, Violeta", "Peña, Ruth",
+                    "Peña, Yovanna", "Perdomo, Rafaela", "Rivera, Fidelina", "Rosario, Ángel",
+                    "Sainvail, Eli", "Sainvil, Isabelle", "Santos, Esmeralda", "Santos, Jeyson",
+                    "Victorino, Romelia"
+                ],
+                "Grupo 2 (Jonathan Pio)": [
+                    "Acosta, Dianelly", "Alexis, María", "Brito, Lorenza", "Brito, Santiago",
+                    "Calderón, Pedro", "Calderón, Yida", "Castillo, Kimberley", "Claudio, Juan",
+                    "Fañas, Rosa", "Fañas, William", "Guerrero, Wendy", "Ignacio, Lilian",
+                    "López, Dulce", "López, Loida", "Morillo, Miguelina", "Mosquea, Altagracia",
+                    "Pio, Jonathan", "Pio, Rubén", "Pio, Ruth", "Pio, Thanel",
+                    "Reyes, Astri", "Reyes, Kaitly", "Reyes, Keissy", "Segura, Egla",
+                    "Segura, Sara", "Segura, Tito", "Tamárez, Carmen"
+                ],
+                "Grupo 3 (Andrés Ramírez)": [
+                    "Abreu, Lourdes", "Abreu, Roberto", "Aquino, Bienvenido", "Aquino, Misael",
+                    "Aquino, Oneida", "Arciniega, Leonicia", "De Jesús, Ysis", "Dévora, Gloria",
+                    "Dévora, Milagros", "Espinosa, Maira", "Espinosa, Rosaury", "Frías, Oniel",
+                    "Marte, Eleudy", "Mena, Yamily", "Mendoza, Yudelka", "Pío, Marciano",
+                    "Pío, Sabrina", "Ramírez, Andrés", "Ramírez, Margarita", "Reyes, Melina",
+                    "Reyes, Zoila", "Rodríguez, Paul", "Rodríguez, Ruth", "Rosario, Jesús",
+                    "Ureña, Reina", "Valdez, Oneida", "Vásquez, Geonelis", "Velásquez, Milagros",
+                    "Zorrilla, Ramona"
+                ]
+            };
+
+            // Función para "sanitizar" nombres para usar como atributos 'name' en HTML
+            function sanitizeNameForHtml(name) {
+                // Normaliza a NFD y remueve diacríticos, luego remueve cualquier caracter que no sea alfanumérico
+                return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, '');
+            }
+
+            // Función para "des-sanitizar" nombres, útil para mostrar los nombres originales
+            function desanitizeNameFromHtml(sanitizedName) {
+                // Esto es un mapeo simple; en una aplicación real, se podría construir un mapa
+                // de sanitizedName -> OriginalName al cargar la página si los nombres son dinámicos
+                const nameMap = {};
+                for (const groupName in groupsData) {
+                    groupsData[groupName].forEach(originalName => {
+                        nameMap[sanitizeNameForHtml(originalName)] = originalName;
+                    });
+                }
+                return nameMap[sanitizedName] || sanitizedName; // Devuelve el original o el sanitizado si no se encuentra
+            }
+
+
+            // JavaScript para desplegar/contraer grupos
             const groupHeaders = document.querySelectorAll('.group-header');
 
-            // Itera sobre cada encabezado de grupo para añadir el evento de clic
             groupHeaders.forEach(header => {
                 header.addEventListener('click', function() {
-                    // Obtiene el ID del contenido objetivo desde el atributo data-target
                     const targetId = this.dataset.target;
-                    // Selecciona el elemento de contenido correspondiente
                     const content = document.getElementById(targetId);
-                    // Selecciona la flecha dentro del encabezado
                     const arrow = this.querySelector('span:last-child');
 
-                    // Alterna la visibilidad del contenido
                     if (content.style.display === 'block') {
                         content.style.display = 'none';
-                        arrow.innerHTML = '&#9660;'; // Flecha hacia abajo cuando está colapsado
-                        this.classList.remove('expanded'); // Elimina la clase 'expanded'
+                        arrow.innerHTML = '&#9660;'; // Flecha hacia abajo
+                        this.classList.remove('expanded');
                     } else {
-                        // Cierra otros grupos abiertos antes de abrir este
                         document.querySelectorAll('.group-content').forEach(otherContent => {
                             if (otherContent.id !== targetId && otherContent.style.display === 'block') {
                                 otherContent.style.display = 'none';
@@ -407,10 +482,9 @@
                                 otherHeader.classList.remove('expanded');
                             }
                         });
-
                         content.style.display = 'block';
-                        arrow.innerHTML = '&#9650;'; // Flecha hacia arriba cuando está expandido
-                        this.classList.add('expanded'); // Añade la clase 'expanded'
+                        arrow.innerHTML = '&#9650;'; // Flecha hacia arriba
+                        this.classList.add('expanded');
                     }
                 });
             });
@@ -418,12 +492,15 @@
             // Manejar el envío del formulario
             const attendanceForm = document.getElementById('attendanceForm');
 
-            attendanceForm.addEventListener('submit', function(event) {
-                event.preventDefault(); // Previene el envío por defecto del formulario (y la recarga de la página)
+            attendanceForm.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Previene el envío por defecto del formulario
 
-                const attendanceData = {}; // Objeto para almacenar los datos de asistencia
+                const attendanceData = {}; // Objeto para almacenar todos los datos de asistencia
+                const absentSummary = {}; // Objeto para almacenar solo los ausentes, agrupados por grupo
 
-                // Obtener todos los grupos de radio buttons (por nombre)
+                let allRequiredSelected = true;
+
+                // 1. Recolectar datos y verificar campos obligatorios
                 const radioGroups = {};
                 document.querySelectorAll('input[type="radio"]').forEach(radio => {
                     if (!radioGroups[radio.name]) {
@@ -432,60 +509,80 @@
                     radioGroups[radio.name].push(radio);
                 });
 
-                let allRequiredSelected = true;
-
-                for (const personName in radioGroups) {
-                    const selectedOption = document.querySelector(`input[name="${personName}"]:checked`);
+                for (const personSanitizedName in radioGroups) {
+                    const selectedOption = document.querySelector(`input[name="${personSanitizedName}"]:checked`);
                     if (selectedOption) {
-                        attendanceData[personName] = selectedOption.value;
+                        attendanceData[personSanitizedName] = selectedOption.value;
                     } else {
                         allRequiredSelected = false;
+                        // El navegador ya debería mostrar un mensaje de error para 'required'
+                        // Podemos añadir un feedback visual aquí si es necesario
                     }
                 }
 
                 if (!allRequiredSelected) {
-                    // El navegador ya manejará la validación 'required', pero este mensaje es una capa extra.
                     alert('Por favor, selecciona una opción para todas las personas antes de registrar la asistencia.');
-                    return; // Detiene la función si no todo lo requerido está seleccionado
+                    return; // Detiene la ejecución si hay campos obligatorios sin seleccionar
                 }
 
+                // 2. Generar el resumen de ausentes por grupo
+                for (const groupName in groupsData) {
+                    const absentInGroup = [];
+                    groupsData[groupName].forEach(originalName => {
+                        const sanitizedName = sanitizeNameForHtml(originalName);
+                        if (attendanceData[sanitizedName] === 'ausente') {
+                            absentInGroup.push(originalName); // Usar el nombre original
+                        }
+                    });
 
-                console.log('Datos de Asistencia Recolectados:', attendanceData);
-
-                // Sección para enviar los datos a un backend (requiere implementación)
-                // Es importante entender que la base de datos y el envío de correos
-                // no pueden manejarse directamente desde el código HTML/JS/CSS del frontend
-                // por razones de seguridad y funcionalidad. Necesitas un servicio de backend.
-
-                /*
-                // Ejemplo conceptual de cómo enviarías datos a un backend:
-                fetch('/api/guardar-asistencia', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(attendanceData),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP! Estado: ${response.status}`);
+                    if (absentInGroup.length > 0) {
+                        absentSummary[groupName] = absentInGroup;
                     }
-                    return response.json(); // O response.text() si el backend no devuelve JSON
-                })
-                .then(data => {
-                    console.log('Respuesta del servidor:', data);
-                    alert('Asistencia registrada con éxito! Los resultados se enviarán por correo.');
-                    // Opcional: Reiniciar el formulario o mostrar un mensaje de éxito
-                    attendanceForm.reset(); // Para limpiar el formulario después del envío
-                })
-                .catch((error) => {
-                    console.error('Error al registrar la asistencia:', error);
-                    alert('Hubo un error al registrar la asistencia. Por favor, inténtalo de nuevo.');
-                });
-                */
+                }
 
-                // Para esta demostración sin un backend, mostramos una alerta simple
-                alert('Asistencia registrada. Consulta la consola del navegador (F12) para ver los datos.\n\nNOTA: Para guardar los datos en una base de datos y enviar correos, necesitarías configurar un servicio de backend.');
+                console.log('Datos de Asistencia Completos:', attendanceData);
+                console.log('Resumen de Personas Ausentes por Grupo:', absentSummary);
+
+                // 3. Simular el envío a un backend
+                // Esta es la parte que necesitaría una implementación real de servidor
+                try {
+                    // Simulación de una llamada a la API de backend
+                    // En un entorno real, la URL sería algo como '/api/submit-attendance'
+                    const response = await fetch('/api/submit-attendance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        // Envía tanto los datos completos como el resumen de ausentes
+                        body: JSON.stringify({
+                            fullAttendance: attendanceData,
+                            absentSummary: absentSummary
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        // Manejar errores HTTP
+                        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+                    }
+
+                    // Asume que el backend devuelve un JSON de confirmación
+                    const result = await response.json();
+                    console.log('Respuesta del servidor:', result);
+
+                    alert('Asistencia registrada con éxito. Los datos se han enviado y el resumen de ausentes se enviará por correo.');
+                    attendanceForm.reset(); // Limpiar el formulario después del envío exitoso
+                    // Opcional: Colapsar todos los grupos después de enviar
+                    document.querySelectorAll('.group-content').forEach(content => {
+                        content.style.display = 'none';
+                        const header = content.previousElementSibling;
+                        header.querySelector('span:last-child').innerHTML = '&#9660;';
+                        header.classList.remove('expanded');
+                    });
+
+                } catch (error) {
+                    console.error('Error al enviar la asistencia:', error);
+                    alert('Hubo un error al registrar la asistencia. Por favor, inténtalo de nuevo. Revisa la consola para más detalles.');
+                }
             });
         });
     </script>
